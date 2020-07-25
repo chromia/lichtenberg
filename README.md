@@ -15,14 +15,47 @@ is a collection of example implementations of [Dielectric Breakdown](https://en.
  
   - Python 3.7 or later
   - C++ Compiler supports C++17
-    - for Windows: recommends Visual Studio 2019(Any Edition)
-    - for Linux(Mac): gcc or clang
+    - for Windows: Visual Studio 2019 is confirmed
+    - for Linux(Mac): gcc 9.3 is confirmed
+  - CMake 3.1 or later
   - [Pybind11](https://github.com/pybind/pybind11)
   - [Pillow](https://pillow.readthedocs.io/en/stable/)
   - [Scipy](https://www.scipy.org/) (for some examples)
+  - [NumPy](https://numpy.org/) (for some examples)
  
-## Build & Install
+## Install
  
+Install essential python libraries
+
+```bash
+pip install pybind11 pillow
+```
+
+(for Ubuntu)Install C++ Compiler and CMake
+```bash
+sudo apt install build-essential cmake
+```
+
+Clone this repository (don't forget *recursive* option)
+
+```bash
+git clone --recursive https://github.com/chromia/lichtenberg.git
+cd lichtenberg
+```
+
+Install with setup.py
+
+```bash
+python setup.py install
+```
+
+## Running examples
+
+```bash
+cd examples
+python 01_basic.py
+...
+```
  
  
 ## License
