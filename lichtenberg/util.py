@@ -113,13 +113,22 @@ def draw_potential(image: Image, control_points: List[Tuple[Tuple[int, int], flo
                 image.putpixel((dx, dy), (r, g, b))
 
 
-def draw_blur(image: Image, control_points: List[Tuple[int, int]],
-              params: List[Tuple[int, float]], multiply: float,
-              color: Tuple[float, float, float] = None, seed: int = None) -> None:
+def extract_points(cells: lb.CellList2D) -> List[Tuple[int, int]]:
+    points = []
+    for y in range(cells.height):
+        for x in range(cells.width):
+            if cells.get_broken(x, y):
+                points.append((x, y))
+    return points
+
+
+def draw_blur_with_points(image: Image, path_points: List[Tuple[int, int]],
+                          params: List[Tuple[int, float]], multiply: float,
+                          color: Tuple[float, float, float] = None, seed: int = None) -> None:
     """
     Draw a lightning with blur effect
     :param image: Target PIL image(with RGB mode)
-    :param control_points: he list of control point. [(x, y), ...]
+    :param path_points: The list of drawing point. [(x, y), ...]
     :param params: The list of <line weight> and <blur radius>. [(weight, radius), ...]
     :param multiply: he coefficient to adjust brightness of light
     :param color: Color using exponential notation. (1.0, 1.0, 1.0) is white, (1.x, 1.0, 1.0) is red.
@@ -129,13 +138,6 @@ def draw_blur(image: Image, control_points: List[Tuple[int, int]],
     if color is None:
         color = (1.0, 1.0, 1.0)
 
-    # Get Paths
-    path_points = []
-    last = control_points[0]
-    for cur in control_points[1:]:
-        line_points = get_path(last, cur, seed=seed)[:-1]  # remove end point(to connect next line)
-        path_points.extend(line_points)
-        last = cur
     x_min, x_max = y_min, y_max = 10 ** 8, -10 ** 8
     for x, y in path_points:
         x_min, x_max = min(x, x_min), max(x, x_max)
@@ -175,6 +177,30 @@ def draw_blur(image: Image, control_points: List[Tuple[int, int]],
                 g = min(255, g + lumG)
                 b = min(255, b + lumB)
                 image.putpixel((dx, dy), (r, g, b))
+
+
+def draw_blur(image: Image, control_points: List[Tuple[int, int]],
+              params: List[Tuple[int, float]], multiply: float,
+              color: Tuple[float, float, float] = None, seed: int = None) -> None:
+    """
+    Draw a lightning with blur effect
+    :param image: Target PIL image(with RGB mode)
+    :param control_points: The list of control point. [(x, y), ...]
+    :param params: The list of <line weight> and <blur radius>. [(weight, radius), ...]
+    :param multiply: he coefficient to adjust brightness of light
+    :param color: Color using exponential notation. (1.0, 1.0, 1.0) is white, (1.x, 1.0, 1.0) is red.
+    :param seed: The seed value of the internal random number generator
+    """
+
+    # Get Paths
+    path_points = []
+    last = control_points[0]
+    for cur in control_points[1:]:
+        line_points = get_path(last, cur, seed=seed)[:-1]  # remove end point(to connect next line)
+        path_points.extend(line_points)
+        last = cur
+
+    draw_blur_with_points(image, path_points, params, multiply, color, seed)
 
 
 if __name__ == '__main__':
