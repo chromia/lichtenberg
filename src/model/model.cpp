@@ -1,6 +1,6 @@
 #include "model.h"
 #include <cstdlib>
-#include <exception>
+#include <stdexcept>
 
 namespace lichtenberg {
 	namespace model {
@@ -11,7 +11,7 @@ namespace lichtenberg {
 
 		bool BreakModel::test(int /*x*/, int /*y*/)
 		{
-			throw std::exception("not implemented");
+			throw std::runtime_error("not implemented");
 		}
 
 		void BreakModel::update(const CellList2D& /*cells*/, const std::vector<Point>& /*broken_list*/) {
