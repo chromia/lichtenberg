@@ -1,11 +1,11 @@
 
 #include "simulator.h"
-#include "model\valuenoisemodel.h"
-#include "model\manualmodel.h"
-#include "model\dbmmodel.h"
-#include "model\fastdbm.h"
-#include "model\dlamodel.h"
-#include "util\electricfield.h"
+#include "model/valuenoisemodel.h"
+#include "model/manualmodel.h"
+#include "model/dbmmodel.h"
+#include "model/fastdbm.h"
+#include "model/dlamodel.h"
+#include "util/electricfield.h"
 #include "tree.h"
 #include <memory>
 #include <pybind11/pybind11.h>

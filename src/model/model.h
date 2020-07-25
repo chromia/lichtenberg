@@ -1,7 +1,7 @@
 #pragma once
 #include <vector>
 #include <memory>
-#include "..\core.h"
+#include "../core.h"
 
 namespace lichtenberg {
 	namespace model {

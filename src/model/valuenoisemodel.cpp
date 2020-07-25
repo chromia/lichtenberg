@@ -1,5 +1,5 @@
 #include "valuenoisemodel.h"
-#include "..\util\noise.h"
+#include "../util/noise.h"
 
 namespace lichtenberg {
 	namespace model {

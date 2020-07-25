@@ -1,6 +1,6 @@
 #pragma once
 #include "core.h"
-#include "model\model.h"
+#include "model/model.h"
 #include <functional>
 #include <tuple>
 #include <memory>
