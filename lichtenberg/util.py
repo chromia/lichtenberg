@@ -163,7 +163,10 @@ def draw_blur_with_points(image: Image, path_points: List[Tuple[int, int]],
             ix = x - x_min + margin
             iy = y - y_min + margin
             c = int(lum * 255)
-            draw.ellipse((ix - w, iy - w, ix + w, iy + w), fill=(c,))
+            if w:
+                draw.ellipse((ix - w, iy - w, ix + w, iy + w), fill=(c,))
+            else:
+                img_sub.putpixel((ix, iy), (c,))
         img_blur = img_sub.filter(ImageFilter.GaussianBlur(radius))
         img_work = ImageMath.eval("work+blur", work=img_work, blur=img_blur)
 
