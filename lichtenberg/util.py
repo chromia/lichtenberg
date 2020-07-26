@@ -131,7 +131,7 @@ def draw_blur_with_points(image: Image, path_points: List[Tuple[int, int]],
     :param image: Target PIL image(with RGB mode)
     :param path_points: The list of drawing point. [(x, y), ...]
     :param params: The list of <line weight> and <blur radius>. [(weight, radius), ...]
-    :param multiply: he coefficient to adjust brightness of light
+    :param multiply: The coefficient to adjust brightness of light
     :param color: Color using exponential notation. (1.0, 1.0, 1.0) is white, (1.x, 1.0, 1.0) is red.
     :param luminance: Luminance corresponding to each *path_point* value.
                       if None is specified, 1.0 is used. The range is [0.0,1.0].
@@ -196,7 +196,7 @@ def draw_blur(image: Image, control_points: List[Tuple[int, int]],
     :param image: Target PIL image(with RGB mode)
     :param control_points: The list of control point. [(x, y), ...]
     :param params: The list of <line weight> and <blur radius>. [(weight, radius), ...]
-    :param multiply: he coefficient to adjust brightness of light
+    :param multiply: The coefficient to adjust brightness of light
     :param color: Color using exponential notation. (1.0, 1.0, 1.0) is white, (1.x, 1.0, 1.0) is red.
     :param seed: The seed value of the internal random number generator
     """
