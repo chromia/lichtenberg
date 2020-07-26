@@ -71,5 +71,6 @@ setup(
     ext_modules=[CMakeExtension('lichtenberg._lichtenberg')],
     cmdclass=dict(build_ext=CMakeBuild),
     zip_safe=False,
-    packages = find_packages(),
+    packages=find_packages(),
+    install_requires=['pillow']
 )
