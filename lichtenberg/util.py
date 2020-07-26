@@ -124,7 +124,8 @@ def extract_points(cells: lb.CellList2D) -> List[Tuple[int, int]]:
 
 def draw_blur_with_points(image: Image, path_points: List[Tuple[int, int]],
                           params: List[Tuple[int, float]], multiply: float,
-                          color: Tuple[float, float, float] = None, seed: int = None) -> None:
+                          color: Tuple[float, float, float] = None,
+                          luminance: List[float] = None) -> None:
     """
     Draw a lightning with blur effect
     :param image: Target PIL image(with RGB mode)
@@ -132,7 +133,8 @@ def draw_blur_with_points(image: Image, path_points: List[Tuple[int, int]],
     :param params: The list of <line weight> and <blur radius>. [(weight, radius), ...]
     :param multiply: he coefficient to adjust brightness of light
     :param color: Color using exponential notation. (1.0, 1.0, 1.0) is white, (1.x, 1.0, 1.0) is red.
-    :param seed: The seed value of the internal random number generator
+    :param luminance: Luminance corresponding to each *path_point* value.
+                      if None is specified, 1.0 is used. The range is [0.0,1.0].
     """
     width, height = image.size
     if color is None:
@@ -142,6 +144,9 @@ def draw_blur_with_points(image: Image, path_points: List[Tuple[int, int]],
     for x, y in path_points:
         x_min, x_max = min(x, x_min), max(x, x_max)
         y_min, y_max = min(y, y_min), max(y, y_max)
+
+    if luminance is None:
+        luminance = [1.0] * len(path_points)
 
     # Blur Effect
     margin = 20
@@ -153,11 +158,12 @@ def draw_blur_with_points(image: Image, path_points: List[Tuple[int, int]],
     for weight, radius in params:
         img_sub = Image.new("L", (work_width, work_height))
         draw = ImageDraw.Draw(img_sub)
-        for x, y in path_points:
+        for (x, y), lum in zip(path_points, luminance):
             w = weight
             ix = x - x_min + margin
             iy = y - y_min + margin
-            draw.ellipse((ix - w, iy - w, ix + w, iy + w), fill=(255,))
+            c = int(lum * 255)
+            draw.ellipse((ix - w, iy - w, ix + w, iy + w), fill=(c,))
         img_blur = img_sub.filter(ImageFilter.GaussianBlur(radius))
         img_work = ImageMath.eval("work+blur", work=img_work, blur=img_blur)
 
@@ -200,7 +206,7 @@ def draw_blur(image: Image, control_points: List[Tuple[int, int]],
         path_points.extend(line_points)
         last = cur
 
-    draw_blur_with_points(image, path_points, params, multiply, color, seed)
+    draw_blur_with_points(image, path_points, params, multiply, color)
 
 
 if __name__ == '__main__':
