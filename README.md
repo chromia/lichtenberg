@@ -11,6 +11,8 @@ is a collection of example implementations of [Dielectric Breakdown](https://en.
  
  The source code of the core algorithm are implemented in C++. Examples are written in Python(via Pybind11).
  
+ ![thumb](https://user-images.githubusercontent.com/6506891/88478910-d4bdd780-cf86-11ea-873c-7355a6ab8b55.png)
+ 
 ## Prerequisites
  
   - Python 3.7 or later
