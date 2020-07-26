@@ -8,3 +8,4 @@ _generate/
 *.so
 *.py[cod]
 *.egg-info
+_dev/
