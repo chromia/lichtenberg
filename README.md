@@ -25,11 +25,6 @@ is a collection of example implementations of [Dielectric Breakdown](https://en.
  
 ## Install
  
-Install essential python libraries
-
-```bash
-pip install pybind11 pillow
-```
 
 (for Ubuntu)Install C++ Compiler and CMake
 ```bash
