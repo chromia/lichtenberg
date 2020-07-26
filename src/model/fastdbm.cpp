@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <cmath>
+#include <stdexcept>
 
 
 namespace lichtenberg {
@@ -13,13 +14,25 @@ namespace lichtenberg {
 		{
 		}
 
-		FastDBM::FastDBM(int width, int height, double min_guarantee, double eta)
+		FastDBM::FastDBM(int width, int height, double min_guarantee, double eta, const std::vector<float>& bias_array)
 			: init(false), width(width), height(height), min_guarantee(min_guarantee), eta(eta),
-			min_potential(0.0), max_potential(0.0), denominator(0.0)
+			min_potential(0.0), max_potential(0.0), denominator(0.0), bias(nullptr)
 		{
 			grid.resize(height);
 			for (int y = 0; y < height; y++) {
 				grid[y].resize(width);
+			}
+
+			if (!bias_array.empty()) {
+				if (bias_array.size() != (size_t)width * height) {
+					throw std::runtime_error("The size of bias_array must be width*height.");
+				}
+				bias = BiasGridPtr(new BiasGrid);
+				for (size_t y = 0; y < height; y++) {
+					const float* src_row = &bias_array[0] + y * (size_t)height;
+					std::vector<float> dst_row(src_row, src_row + width);
+					bias->push_back(dst_row);
+				}
 			}
 		}
 		bool FastDBM::test(int x, int y)
@@ -93,12 +106,25 @@ namespace lichtenberg {
 			return std::sqrt(dx * dx + dy * dy);
 		}
 
-		static double calc_potential(const Point& candidate_site, const Point& point_charge)
+		double FastDBM::calc_bias_factor(const Point& position)
+		{
+			if (bias) {
+				auto [x, y] = position;
+				return (*bias)[y][x];
+			}
+			else {
+				return 1.0;
+			}
+		}
+
+		double FastDBM::calc_potential(const Point& candidate_site, const Point& point_charge)
 		{
 			//expression (9)
 			const double R1 = 0.5;
-			double d = distance(candidate_site, point_charge);
-			return (1.0 - R1 / d);
+			const double d = distance(candidate_site, point_charge);
+			const double bias_factor = calc_bias_factor(candidate_site);
+			const double potential = (1.0 - R1 / d);
+			return potential * bias_factor;
 		}
 
 		void FastDBM::initialize_potentials(const Point candidate_site)

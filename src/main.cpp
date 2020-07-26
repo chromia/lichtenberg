@@ -12,6 +12,7 @@
 #include <pybind11/stl.h>
 #include <pybind11/functional.h>
 #include <cstdlib>
+#include <optional>
 
 using namespace lichtenberg;
 using namespace lichtenberg::model;
@@ -64,9 +65,9 @@ PYBIND11_MODULE(_lichtenberg, m) {
 		.def("get_potential", &DielectricBreakModel::get_potential);
 
 	py::class_<FastDBM, std::shared_ptr<FastDBM>, BreakModel>(m, "FastDBM")
-		.def(py::init<int, int, double, double>(),
+		.def(py::init<int, int, double, double, const std::vector<float>&>(),
 			py::arg("width"), py::arg("height"),
-			py::arg("min_guarantee") = 0.0, py::arg("eta") = 1.0);
+			py::arg("min_guarantee") = 0.0, py::arg("eta") = 1.0, py::arg("bias") = std::vector<float>());
 
 	py::class_<DLABreakModel, std::shared_ptr<DLABreakModel>, BreakModel>(m, "DLABreakModel")
 		.def(py::init<int, int, int>(),

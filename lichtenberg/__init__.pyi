@@ -45,7 +45,7 @@ class DielectricBreakModel(BreakModel):
 
 
 class FastDBM(BreakModel):
-    def __init__(self, width: int, height: int, min_guarantee: float = 0.0, eta: float = 1.0) -> None: ...
+    def __init__(self, width: int, height: int, min_guarantee: float = 0.0, eta: float = 1.0, bias: List[float] = None) -> None: ...
 
 
 class DLABreakModel(BreakModel):

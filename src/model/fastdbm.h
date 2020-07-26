@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include <set>
+#include <optional>
 
 /*
 	An implementation of Fast DBM
@@ -20,7 +21,7 @@ namespace lichtenberg {
 
 		class FastDBM : public BreakModel {
 		public:
-			FastDBM(int width, int height, double min_guarantee = 0.0, double eta = 1.0);
+			FastDBM(int width, int height, double min_guarantee = 0.0, double eta = 1.0, const std::vector<float>& bias = {});
 			FastDBM(const FastDBM&) = delete;
 			FastDBM& operator =(const FastDBM&) = delete;
 
@@ -47,6 +48,13 @@ namespace lichtenberg {
 				FDBMCell(double potential = FDBM_INITIAL_POTENTIAL);
 			};
 			std::vector<std::vector<FDBMCell>> grid;
+
+			typedef std::vector<std::vector<float>> BiasGrid;
+			typedef std::shared_ptr<BiasGrid> BiasGridPtr;
+			BiasGridPtr bias;
+
+			double calc_potential(const Point& candidate_site, const Point& point_charge);
+			double calc_bias_factor(const Point& position);
 		};
 	}
 }
