@@ -1,6 +1,8 @@
 # Lichtenberg
 
-is a collection of example implementations of [Dielectric Breakdown](https://en.wikipedia.org/wiki/Electrical_breakdown) represents `Lichtenberg Figure` like thunder and lightning.
+![test](https://github.com/chromia/lichtenberg/workflows/test/badge.svg)
+
+Lichtenberg is a collection of example implementations of [Dielectric Breakdown](https://en.wikipedia.org/wiki/Electrical_breakdown) represents `Lichtenberg Figure` like thunder and lightning.
 
 
  - DBM(Dielectric Breakdown Model) - [Paper](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.52.1033)
