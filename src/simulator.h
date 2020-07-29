@@ -38,6 +38,7 @@ namespace lichtenberg {
 	private:
 		bool check_dir(int x, int y);
 		std::tuple<bool, bool> breaking(int x, int y, std::vector<Point>& points, BreakCallBack callback);
+		void insulate_cell(int x, int y);
 	};
 
 }

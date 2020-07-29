@@ -1,4 +1,5 @@
 #include "simulator.h"
+#include <stdexcept>
 
 namespace lichtenberg {
 
@@ -7,6 +8,12 @@ namespace lichtenberg {
 		: cells(width, height), model(model),
 		def_up(up), def_down(down), def_left(left), def_right(right)
 	{
+		if (width <= 0) {
+			throw std::invalid_argument("Width must be greater than zero.");
+		}
+		else if (height <= 0) {
+			throw std::invalid_argument("Height must be greater than zero.");
+		}
 	}
 
 	//check whether the cell receive electrons from surrounding cells
@@ -101,17 +108,27 @@ namespace lichtenberg {
 
 	void Simulator::breakdown(int x, int y)
 	{
+		if (x < 0 || x >= cells.width || y < 0 || y >= cells.height) {
+			throw std::invalid_argument("The specified coordinate is invalid.");
+		}
+		cells.set_broken(x, y);
+		cells.set_dir(x, y, Direction::None);
+	}
+
+	void Simulator::insulate_cell(int x, int y)
+	{
 		if (x < 0 || x >= cells.width || y < 0 || y >= cells.height) return;
+		cells.set_insulated(x, y);
 		cells.set_broken(x, y);
 		cells.set_dir(x, y, Direction::None);
 	}
 
 	void Simulator::insulate(int x, int y)
 	{
-		if (x < 0 || x >= cells.width || y < 0 || y >= cells.height) return;
-		cells.set_insulated(x, y);
-		cells.set_broken(x, y);
-		cells.set_dir(x, y, Direction::None);
+		if (x < 0 || x >= cells.width || y < 0 || y >= cells.height) {
+			throw std::invalid_argument("The specified coordinate is invalid.");
+		}
+		insulate_cell(x, y);
 	}
 
 	void Simulator::insulate_square(int x1, int y1, int x2, int y2, bool fill)
@@ -134,18 +151,18 @@ namespace lichtenberg {
 		if (fill) {
 			for (int iy = y1; iy < y2; iy++) {
 				for (int ix = x1; ix < x2; ix++) {
-					insulate(ix, iy);
+					insulate_cell(ix, iy);
 				}
 			}
 		}
 		else {
 			for (int x = x1; x < x2; x++) {
-				insulate(x, y1);
-				insulate(x, y2 - 1);
+				insulate_cell(x, y1);
+				insulate_cell(x, y2 - 1);
 			}
 			for (int y = y1 + 1; y < y2 - 1; y++) {
-				insulate(x1, y);
-				insulate(x2 - 1, y);
+				insulate_cell(x1, y);
+				insulate_cell(x2 - 1, y);
 			}
 		}
 
@@ -172,27 +189,27 @@ namespace lichtenberg {
 
 			if (fill) {
 				for (int x = (cx - dy); x <= (cx + dy); x++) {
-					insulate(x, cy + dx);
+					insulate_cell(x, cy + dx);
 				}
 				for (int x = (cx - dx); x <= (cx + dx); x++) {
-					insulate(x, cy + dy);
+					insulate_cell(x, cy + dy);
 				}
 				for (int x = (cx - dy); x <= (cx + dy); x++) {
-					insulate(x, cy - dx);
+					insulate_cell(x, cy - dx);
 				}
 				for (int x = (cx - dx); x <= (cx + dx); x++) {
-					insulate(x, cy - dy);
+					insulate_cell(x, cy - dy);
 				}
 			}
 			else {
-				insulate(cx + dy, cy + dx);
-				insulate(cx + dx, cy + dy);
-				insulate(cx - dx, cy + dy);
-				insulate(cx - dy, cy + dx);
-				insulate(cx - dy, cy - dx);
-				insulate(cx - dx, cy - dy);
-				insulate(cx + dx, cy - dy);
-				insulate(cx + dy, cy - dx);
+				insulate_cell(cx + dy, cy + dx);
+				insulate_cell(cx + dx, cy + dy);
+				insulate_cell(cx - dx, cy + dy);
+				insulate_cell(cx - dy, cy + dx);
+				insulate_cell(cx - dy, cy - dx);
+				insulate_cell(cx - dx, cy - dy);
+				insulate_cell(cx + dx, cy - dy);
+				insulate_cell(cx + dy, cy - dx);
 			}
 			dx++;
 		}
@@ -220,6 +237,10 @@ namespace lichtenberg {
 					pF->push_back(Point(x, y));
 				}
 			}
+		}
+
+		if (pF->size() == 0) {
+			throw std::runtime_error("No initial break point found.");
 		}
 
 		//enlarge broken area
