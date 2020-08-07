@@ -48,7 +48,7 @@ PYBIND11_MODULE(_lichtenberg, m) {
 			py::arg("x"), py::arg("y"));
 
 	py::class_<ManualBreakModel, std::shared_ptr<ManualBreakModel>, BreakModel>(m, "ManualBreakModel")
-		.def(py::init<int, int, std::vector<float>&, float>(),
+		.def(py::init<int, int, const ManualBreakModel::Grid&, float>(),
 			py::arg("width"), py::arg("height"),
 			py::arg("source"), py::arg("min_guarantee") = 0.05f);
 

@@ -21,7 +21,7 @@ class ValueNoiseBreakModel(BreakModel):
 
 
 class ManualBreakModel(BreakModel):
-    def __init__(self, width: int, height: int, source: List[float], min_guarantee: float = 0.05) -> None: ...
+    def __init__(self, width: int, height: int, source: List[List[float]], min_guarantee: float = 0.05) -> None: ...
 
 
 class DBMCell:

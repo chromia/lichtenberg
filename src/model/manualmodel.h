@@ -12,7 +12,8 @@ namespace lichtenberg {
 			int height;
 			float* map;
 		public:
-			ManualBreakModel(int width, int height, const std::vector<float>& source, float min_guarantee = 0.05);
+			typedef std::vector<std::vector<float>> Grid;
+			ManualBreakModel(int width, int height, const Grid& source, float min_guarantee = 0.05);
 			ManualBreakModel(const ManualBreakModel&) = delete;
 			ManualBreakModel& operator =(const ManualBreakModel&) = delete;
 			~ManualBreakModel();

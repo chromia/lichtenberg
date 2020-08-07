@@ -21,13 +21,15 @@ In the case of "min_guarantee == 0.05":
 
 def image_to_array(image: Image):
     """
-    convert 2D-image to 1d-array(float)
+    convert 2D-image to 2d-array(float)
     """
     pixels = []
     for y in range(image.height):
+        row = []
         for x in range(image.width):
             f = image.getpixel((x, y)) / 255  # normalize 0.0<=f<=1.0
-            pixels.append(f)
+            row.append(f)
+        pixels.append(row)
     return pixels
 
 
