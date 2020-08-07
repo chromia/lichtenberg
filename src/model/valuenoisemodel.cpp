@@ -1,12 +1,17 @@
 #include "valuenoisemodel.h"
 #include "../util/noise.h"
+#include <stdexcept>
 
 namespace lichtenberg {
 	namespace model {
 		ValueNoiseBreakModel::ValueNoiseBreakModel(int width, int height, float min_guarantee,
 			int seed, float scale, float persistence, int octaves)
-			: width(width), height(height)
+			: width(width), height(height), map(nullptr)
 		{
+			if (width <= 0 || height <= 0) {
+				throw std::invalid_argument("width and height must be positive.");
+			}
+
 			map = new float[width * height];
 			double max_rate = 1.0 - min_guarantee;
 			util::noise_init(seed);
