@@ -74,7 +74,7 @@ There are several implemented breakdown models.
 |Uniformed Probability Model(*1)|DefaultBreakModel|http://lazylifeeasyexit.blog67.fc2.com/blog-entry-53.html|
 |ValueNoise Probability Model(*1)|ValueNoiseBreakModel|original|
 |Probablity by Image(*1)|ManualBreakModel|original|
-|Dielectric Breakdown Model|DielectricBreakdownModel|https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.52.1033|
+|Dielectric Breakdown Model|DielectricBreakModel|https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.52.1033|
 |Fast DBM(*1)|FastDBM|http://gamma.cs.unc.edu/FRAC/|
 |Diffusion-limited aggregation|DLABreakModel|https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.47.1400|
 
@@ -91,7 +91,7 @@ sim2 = lb.Simulator(width, height)  (2)
 
 (2) is the same as (1).
 
-see also /examples/01_basic.py
+see also [/examples/01_basic.py](https://github.com/chromia/lichtenberg/blob/master/examples/01_basic.py)
 
 ### Value Noise Probability Model(ValueNoiseBreakModel)
 
@@ -114,7 +114,9 @@ model = lb.ValueNoiseBreakModel(width, height)
 sim = Simulator(width, height, model)
 ```
 
-You can extract the probability by `get`.
+You can extract the probability by `get(x,y)`.
+
+see also [/examples/02_valuenoisemodel.py](https://github.com/chromia/lichtenberg/blob/master/examples/02_valuenoisemodel.py)
 
 ```python
 prob = model.get(0, 0)
@@ -122,4 +124,75 @@ prob = model.get(0, 0)
 
 ### Probability by Image(ManualBreakModel)
 
-now writing.
+ManualBreakModel receives 2D-probability map directly and use it.
+
+```python
+prob_map = [
+    [0.50, 0.01, 0.01],
+    [0.50, 0.50, 0.01],
+    [0.01, 0.50, 0.50]
+]
+model = lb.ManualBreakModel(3, 3, prob_map)
+```
+
+|Argument|Type|Default|Description|
+|---|---|---|---|
+|width|int|-||
+|height|int|-||
+|source|List[List[float]]|-|2D-array of cell which stores probability.|
+|min_guarantee|float|0.05|Minimum probability of each cell. If probability = 0.0 is set by random number, the simulation will never end. To prevent this, probabilities of all cells are narrowed in the range \[min_guarantee, 1.0\].|
+
+see also [/examples/03_imagemodel.py](https://github.com/chromia/lichtenberg/blob/master/examples/03_imagemodel.py)
+
+### Dielectric Breakdown Model(DielectricBreakdownModel)
+
+This is an implementation [DBM](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.52.1033).
+
+In this model, initial condition of electric charge is required. It is 2D-array of `DBMCell` with the size (width+2)*(height+2). Plus 2 means the outside border of simulation area.
+For example, If the size of simulation area is 3x3, then the size of initial condition is 5x5.
+
+```python
+potentials = [
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1]
+]
+```
+
+The value of potential(voltage of electric charge) represents the power of attraction. In this case, the direction of breakdown is downward.
+
+```python
+locked = [
+    [1, 1, 1, 1, 1],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [1, 0, 0, 0, 1],
+    [1, 1, 1, 1, 1],
+]
+```
+`locked` flag indicates potential value of the cell will never change during simulation. 
+As very important constraints, the cells on outside border must be locked.
+
+```python
+initial = [[lb.DBMCell(p, bool(l)) for p, l in zip(row_p, row_l)]
+           for row_p, row_l in zip(potentials, locked)]
+model = lb.DielectricBreakModel(3, 3, initial)
+```
+
+So `DBMCell` requires two arguments, `potential` and `locked`.
+
+|Argument|Type|Default|Description|
+|---|---|---|---|
+|width|int|-||
+|height|int|-||
+|initial_state_|List[List[DBMCell]]|-|2D-array of `DBMCell` which stores potential and locked state.|
+|min_guarantee|float|0.05|Minimum probability of each cell. If probability = 0.0 is set by random number, the simulation will never end. To prevent this, probabilities of all cells are narrowed in the range \[min_guarantee, 1.0\].|
+|eta|float|1.0|Parameter for branching. The higher the value, the less likely it is to branch out.
+
+see also [/examples/09_dbm_top.py](https://github.com/chromia/lichtenberg/blob/master/examples/09_dbm_top.py) and [/examples/09_dbm_circle.py](https://github.com/chromia/lichtenberg/blob/master/examples/09_dbm_circle.py)
+
+### Fast DBM(FastDBM)
+
+now writing...
