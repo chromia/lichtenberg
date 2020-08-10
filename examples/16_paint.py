@@ -369,7 +369,6 @@ class App(Window):
         if filepath == "":
             return
         else:
-            print(type(self.result_image))
             self.result_image.save(filepath)
 
 
