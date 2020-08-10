@@ -146,10 +146,13 @@ see also [/examples/03_imagemodel.py](https://github.com/chromia/lichtenberg/blo
 
 ### Dielectric Breakdown Model(DielectricBreakdownModel)
 
-This is an implementation [DBM](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.52.1033).
+This is an implementation: ["Fractal Dimension of Dielectric Breakdown"](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.52.1033).
+It is a basic model which simulates breakdown phenomenon. But there is one problem, this method is very very slow.
+You should simulate with the size width<=100 and height<=100 at first.
 
-In this model, initial condition of electric charge is required. It is 2D-array of `DBMCell` with the size (width+2)*(height+2). Plus 2 means the outside border of simulation area.
-For example, If the size of simulation area is 3x3, then the size of initial condition is 5x5.
+In this model, initial condition of electric charge is required. It is 2D-array of `DBMCell` with the size (width+2)*(height+2).
+Plus 2 means the outside border of simulation area.
+For example, If the size of simulation area is 3x3, then initial condition is 5x5.
 
 ```python
 potentials = [
@@ -191,8 +194,77 @@ So `DBMCell` requires two arguments, `potential` and `locked`.
 |min_guarantee|float|0.05|Minimum probability of each cell. If probability = 0.0 is set by random number, the simulation will never end. To prevent this, probabilities of all cells are narrowed in the range \[min_guarantee, 1.0\].|
 |eta|float|1.0|Parameter for branching. The higher the value, the less likely it is to branch out.
 
-see also [/examples/09_dbm_top.py](https://github.com/chromia/lichtenberg/blob/master/examples/09_dbm_top.py) and [/examples/09_dbm_circle.py](https://github.com/chromia/lichtenberg/blob/master/examples/09_dbm_circle.py)
+see also [/examples/09_dbm_top.py](https://github.com/chromia/lichtenberg/blob/master/examples/09_dbm_top.py) and 
+[/examples/09_dbm_circle.py](https://github.com/chromia/lichtenberg/blob/master/examples/09_dbm_circle.py)
 
 ### Fast DBM(FastDBM)
 
-now writing...
+This is an implementation: ["Fast Simulation of Laplacian Growth"](http://gamma.cs.unc.edu/FRAC/).  
+The performance is extremely faster than DBM.
+
+`FastDBM` requires `bias` parameter which is a 2D float array and a gradient in the simulation field.
+If `bias` is `None`, a no gradient is taken, and then the figure of breakdown is omnidirection branching.
+You can use `lichtenberg.fastdbm.make_bias` to create `bias`.
+
+```python
+from lichtenberg.fastdbm import BiasDirection, make_bias
+bias = make_bias(BiasDirection.Down, width, height)  # Downward
+model = lb.FastDBM(width, height, bias=bias)
+```
+
+`make_bias` supports four direction.
+If you require another pattern, you should implement original function with reference to 
+[make_bias](https://github.com/chromia/lichtenberg/blob/master/lichtenberg/fastdbm.py).
+
+|Argument|Type|Default|Description|
+|---|---|---|---|
+|width|int|-||
+|height|int|-||
+|min_guarantee|float|0.05|Minimum probability of each cell. If probability = 0.0 is set by random number, the simulation will never end. To prevent this, probabilities of all cells are narrowed in the range \[min_guarantee, 1.0\].|
+|eta|float|1.0|Parameter for branching. The higher the value, the less likely it is to branch out.
+|bias|List[List[float]]|None|2D-array of bias factor of the cell.|
+
+### Diffusion-limited aggregation(DLABreakModel)
+
+This is a *poor* implementation of DLA. The performance is not good and function is not enough.
+
+|Argument|Type|Default|Description|
+|---|---|---|---|
+|width|int|-||
+|height|int|-||
+|num_particle|int|-|The number of particles.|
+
+## Callbacks
+
+There are two callbacks on simulation. You can use these for Cancelling, Logging, Visualization and Progress Reporting.
+
+- callback on break
+- callback on loop
+
+```python
+sim.simulate(max_loop, callback_on_break, callback_on_loop)
+```
+
+### Callback on Break
+
+Called when a cell is broken, and its coordinate is provided.
+
+```python
+def callback_on_break(x: int, y: int) -> bool:
+    return False
+```
+
+If `True` is returned, simulation will be stop.
+
+### Callback on Loop
+
+Called when the simulator begins new iteration. Current iteration number and `CellList2D` are provided.
+
+```python
+def callback_on_loop(current_loop: int, max_loop: int, cells: lb.CellList2D) -> bool:
+    print(f"{current_loop}/{max_loop}")  # show progress
+    return False
+```
+
+If `True` is returned, simulation will be stop.
+
