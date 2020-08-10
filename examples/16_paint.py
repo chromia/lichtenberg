@@ -1,5 +1,6 @@
 # Lichtenberg
 from lichtenberg.util import draw_blur
+import lichtenberg as lb
 
 # Standard Libraries
 from typing import List, Tuple, Callable
@@ -357,6 +358,7 @@ class App(Window):
         image = self.base_image.copy()
         blur_params = [(0, 1), (1, 4), (1, 8), (2, 8)]
         for line in self.lines.data:
+            lb.set_random_seed(line.seed)
             if len(line.points) >= 2:
                 draw_blur(image, line.points, blur_params, line.weight, line.color, line.seed)
         self.change_image(image)
