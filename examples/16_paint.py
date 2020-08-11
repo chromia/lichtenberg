@@ -10,7 +10,7 @@ from tkinter.filedialog import asksaveasfilename
 import sys
 
 # External Libraries
-from PIL import Image, ImageTk
+from PIL import Image, ImageTk, ImageMath
 
 
 class Window:
@@ -137,20 +137,31 @@ class Window:
 
 
 class Line:
-    def __init__(self):
+    """
+    Data and Rendering
+    """
+
+    def __init__(self, size: Tuple[int, int],
+                 callback: Callable[["Image", "Image"], None] = None):
         self.points: List[Tuple[int, int]] = []
+        self.callback = callback
         self.weight = 0.50
         self.col_r = 1.00
         self.col_g = 1.00
         self.col_b = 1.00
         self.seed = randint(0, 2**16)
+        self.image_size = size
+        self.image = None
+        self.draw()
 
     def add(self, point):
         self.points.append(point)
+        self.draw()
 
     def back(self):
         try:
             self.points.pop()
+            self.draw()
         except IndexError:
             pass
 
@@ -164,6 +175,7 @@ class Line:
 
     def update_seed(self):
         self.seed = randint(0, 2**16)
+        self.draw()
 
     def __str__(self):
         n = len(self.points)
@@ -171,16 +183,33 @@ class Line:
         f = "" if n == 0 else str(self.points[0])
         return f"points:{n} weight={w} {f}"
 
+    def draw(self):
+        last_image = self.image
+        image = Image.new("RGB", self.image_size)
+        lb.set_random_seed(self.seed)
+        if len(self.points) >= 2:
+            blur_params = [(0, 1), (1, 4), (1, 8), (2, 8)]
+            draw_blur(image, self.points, blur_params, self.weight, self.color, self.seed)
+        self.image = image
+        if self.callback:
+            self.callback(last_image, image)  # notify update
+
 
 class LineListManager:
     """
-    Synchronization between Line-data and ListBox
+    1. Synchronization between Line-data and ListBox
+    2. Image composition
+       sum = sigma(line.image)
+       But repetitive summation is costly. So apply differential update.
+       sum' = sum - last + current
     """
-    def __init__(self, listbox, callback_on_select: Callable[[Line], None]):
+    def __init__(self, listbox, callback_on_select: Callable[[Line], None], size: Tuple[int, int]):
         self.listbox = listbox
         self.data: List[Line] = []
         self.current_index = -1
         self.callback_on_select = callback_on_select
+        self.image_size = size
+        self.image = Image.new("RGB", size)
 
     @property
     def current_line(self):
@@ -195,7 +224,8 @@ class LineListManager:
 
     def new_line(self):
         # add new line
-        self.data.append(Line())
+        new_line = Line(self.image_size, self._update_image)
+        self.data.append(new_line)
         self.current_index = self.line_count - 1
         self.callback_on_select(self.current_line)
         # sync with listbox
@@ -263,10 +293,30 @@ class LineListManager:
         else:
             self.current_index = -1
 
+    @staticmethod
+    def _process_image(dest: Image, source: Image, op: str):
+        # Split
+        ch_list = ["R", "G", "B"]
+        dest_channels = [dest.getchannel(ch) for ch in ch_list]
+        source_channels = [source.getchannel(ch) for ch in ch_list]
+        # Operate
+        dest_channels = [ImageMath.eval(f"d{op}s", d=d, s=s).convert("L")
+                         for d, s in zip(dest_channels, source_channels)]
+        # Merge
+        return Image.merge(dest.mode, dest_channels)
+
+    def _update_image(self, last: Image, current: Image):
+        # Update sum
+        # sum' = sum - last + current
+        if last:
+            self.image = self._process_image(self.image, last, "-")
+        if current:
+            self.image = self._process_image(self.image, current, "+")
+
 
 class App(Window):
     """
-    Event Dispatching and Image generation
+    Event Dispatching
     """
 
     def __init__(self, **kwargs):
@@ -275,7 +325,7 @@ class App(Window):
         initial_image = self.base_image.copy()
         self.change_image(initial_image)
         self.result_image = initial_image
-        self.lines = LineListManager(self.listbox, self._callback_on_select)
+        self.lines = LineListManager(self.listbox, self._callback_on_select, initial_image.size)
 
     def _init_image(self, **kwargs):
         filepath = kwargs.get("filepath", None)
@@ -288,7 +338,9 @@ class App(Window):
         return image
 
     def _update(self):
-        self._generate_image()
+        new_image = self.lines.image
+        self.change_image(new_image)
+        self.result_image = new_image
 
     def key_event(self, event):
         update = False
@@ -353,16 +405,6 @@ class App(Window):
         self.col_r.set(line.col_r)
         self.col_g.set(line.col_g)
         self.col_b.set(line.col_b)
-
-    def _generate_image(self):
-        image = self.base_image.copy()
-        blur_params = [(0, 1), (1, 4), (1, 8), (2, 8)]
-        for line in self.lines.data:
-            lb.set_random_seed(line.seed)
-            if len(line.points) >= 2:
-                draw_blur(image, line.points, blur_params, line.weight, line.color, line.seed)
-        self.change_image(image)
-        self.result_image = image
 
     def _export_png(self):
         filepath = asksaveasfilename(initialdir=".", title="Export as PNG",
