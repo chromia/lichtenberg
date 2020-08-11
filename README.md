@@ -61,6 +61,9 @@ python 01_basic.py
 
 The result will be output to *examples/* directory(e.g. examples/01_basic_gray.png)
  
+## Documentation
+
+[docs/](https://github.com/chromia/lichtenberg/tree/master/docs)
  
 ## License
 
